@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>template</title>
+	<script src="https://code.jquery.com/jquery-2.1.3.js"></script>
+	<script src="node_modules/handlebars/dist/handlebars.js"></script>
+</head>
+<body>
+
+<div id="template"></div>
+
+<script>
+	$.ajax({
+		url: 'template.hbs',
+		cache: true,
+		success: function(data) {
+			var template  = Handlebars.compile(data);
+			$('#template').html(template({
+				memories: [{
+					link: '#link',
+					title: 'first memory'
+				}, {
+					link: '#link',
+					title: 'second memory'
+				}]
+			}));
+		}
+	});
+</script>
+
+</body>
+</html>
