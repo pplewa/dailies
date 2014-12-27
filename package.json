@@ -12,6 +12,8 @@
     "evernote": "^1.25.3",
     "handlebars": "^2.0.0",
     "moment": "^2.8.4",
+    "moves-api": "0.0.4",
+    "polyline-encoded": "0.0.5",
     "q": "^1.1.2",
     "request": "^2.51.0",
     "settings": "^0.1.1"

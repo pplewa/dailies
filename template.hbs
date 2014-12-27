@@ -47,21 +47,33 @@
 				</tr>
 			</thead>
 			<tbody style="background: #fff;">
+				{{#each storyline.segments}}
 				<tr>
-					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-right: 1px #8B572A solid;">stats</td>
-					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-right: 1px #8B572A solid; border-left: 1px #8B572A solid;">place</td>
-					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-left: 1px #8B572A solid;">map</td>
+					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-right: 1px #8B572A solid;">
+						<div><strong>Start:</strong> {{start}}</div>
+						<div><strong>End:</strong> {{end}}</div>
+						<div><strong>Activity:</strong> {{activity}}</div>
+						<div><strong>Duration:</strong> {{mins duration}} min</div>
+						<div><strong>Distance:</strong> {{distance}} m</div>
+						{{#if steps}}<div><strong>Steps:</strong> {{steps}}</div>{{/if}}
+						{{#if calories}}<div><strong>Calories:</strong> {{calories}}</div>{{/if}}
+					</td>
+					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-right: 1px #8B572A solid; border-left: 1px #8B572A solid;">
+						{{#if place.foursquareId}}<a href="https://foursquare.com/v/x/{{place.foursquareId}}">{{/if}}{{#if place.name}}{{place.name}}{{else}}&nbsp;{{/if}}{{#if place.foursquareId}}</a>{{/if}}
+					</td>
+					<td style="padding: 10px; min-width: 127px; max-width: 127px; width: 127px; border-bottom: 1px #8B572A solid; border-left: 1px #8B572A solid;">
+						{{#if place.lat}}
+							<a href="http://www.google.com/maps?q={{place.lat}},{{place.lon}}" style="width: 125px; height: 125px; border: 1px #ccc solid; float: left; background: url('http://maps.googleapis.com/maps/api/staticmap?sensor=false&amp;zoom=17&amp;size=125x125&amp;scale=1&amp;center={{place.lat}},{{place.lon}}&amp;markers={{place.lat}},{{place.lon}}&amp;key={{config "google" "key"}}') 0 0 no-repeat;">
+								<table width="125" cellpadding="0" cellspacing="0" border="0"><tr><td><br /></td></tr></table>
+							</a>
+						{{else}}
+							<a href="http://www.google.com/maps?q={{route.start.lat}},{{route.start.lon}}" style="width: 125px; height: 125px; border: 1px #ccc solid; float: left; background: url('http://maps.googleapis.com/maps/api/staticmap?size=125x125&amp;path=color:0xff0000ff|weight:3|{{route.path}}&amp;markers=label:S%7C{{route.start.lat}},{{route.start.lon}}&amp;markers=label:F%7C{{route.finish.lat}},{{route.finish.lon}}&amp;key={{config "google" "key"}}') 0 0 no-repeat;">
+								<table width="125" cellpadding="0" cellspacing="0" border="0"><tr><td><br /></td></tr></table>
+							</a>
+						{{/if}}
+					</td>
 				</tr>
-				<tr>
-					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-right: 1px #8B572A solid;">stats</td>
-					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-right: 1px #8B572A solid; border-left: 1px #8B572A solid;">place</td>
-					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-left: 1px #8B572A solid;">map</td>
-				</tr>
-				<tr>
-					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-right: 1px #8B572A solid;">stats</td>
-					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-right: 1px #8B572A solid; border-left: 1px #8B572A solid;">place</td>
-					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-left: 1px #8B572A solid;">map</td>
-				</tr>
+				{{/each}}
 			</tbody>
 		</table>
 
@@ -73,7 +85,17 @@
 		<table style="width: 100%; min-width: 100%; max-width: 100%; border: 2px #8B572A solid;" cellpadding="0" cellspacing="0" border="0">
 			<tbody style="background: #fff;">
 				<tr>
-					<td style="padding: 10px; border-right: 1px #8B572A solid;">stats</td>
+					<td style="padding: 10px; border-right: 1px #8B572A solid;">
+						{{#each storyline.summary}}
+							<div><strong>{{activity}}</strong></div>
+							<ul>
+								<li><strong>Distance:</strong> {{distance}} m</li>
+								<li><strong>Duration:</strong> {{mins duration}} min</li>
+								{{#if steps}}<li><strong>Steps:</strong> {{steps}}</li>{{/if}}
+								{{#if calories}}<li><strong>Calories:</strong> {{calories}}</li>{{/if}}
+							</ul>
+						{{/each}}
+					</td>
 					<td style="padding: 10px; border-left: 1px #8B572A solid;">map</td>
 				</tr>
 			</tbody>
