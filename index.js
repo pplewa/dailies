@@ -156,35 +156,40 @@ function getStoryline() {
 		} else {
 			var storyline = {
 				summary: storylines[0].summary,
-				paths: [],
+				mapPath: '',
 				segments: []
 			};
 
 			var paths = [];
-			storylines[0].segments.forEach(function(seg, i){
-				paths[i] = {
-					walking: [],
-					traveling: []
-				};
-				seg.activities.forEach(function(activity){
-					if (activity.activity === 'walking') {
-						activity.trackPoints.forEach(function(point){
-							paths[i].walking.push([point.lat, point.lon]);
-						});
-					} else {
-						 activity.trackPoints.forEach(function(point){
-							paths[i].traveling.push([point.lat, point.lon]);
-						});
-					}
-				});
-			});
-			paths.forEach(function(path){
-				if (path.walking.length){
-					storyline.paths.push('path=color:0xff0000ff|enc:' + polyUtil.encode(path.walking));
-				} else if (path.traveling.length){
-					storyline.paths.push('path=color:0x666666ff|enc:' + polyUtil.encode(path.traveling));
+			var activities = [];
+			var previousActivity = '';
+			storylines[0].segments.forEach(function(segment) {
+				// Add movements if we got an activities segment
+				if(segment.type == 'move' && Array.isArray(segment.activities)) {
+					segment.activities.forEach(function(activity) {
+						if (activity.activity === previousActivity) {
+							activity.trackPoints.forEach(function(point, i) {
+								paths[paths.length-1].push([point.lat, point.lon]);
+							});
+						} else {
+							previousActivity = activity.activity === 'walking' ? 'walking' : 'move';
+							var _temp = [];
+							activity.trackPoints.forEach(function(point, i) {
+								_temp.push([point.lat, point.lon]);
+							});
+							paths[paths.length] = _temp;
+							activities[paths.length] = previousActivity;
+						}
+					});
 				}
 			});
+
+			var urlPath = ''
+			paths.forEach(function(path, i){
+				var style = activities[i] === 'walking' ? 'color:black|' : 'color:green|';
+				urlPath += '&path='+style+'enc:' + encodeURIComponent(polyUtil.encode(path));
+			});
+			storyline.mapPath = urlPath;
 
 			storylines[0].segments.forEach(function(segment, i){
 				if (segment.place) {
@@ -235,9 +240,9 @@ function getStoryline() {
 								lat: activity.trackPoints[activity.trackPoints.length-1].lat,
 								lon: activity.trackPoints[activity.trackPoints.length-1].lon
 							}
-							var path = polyUtil.encode(activity.trackPoints.map(function(point){
+							var path = encodeURIComponent(polyUtil.encode(activity.trackPoints.map(function(point){
 								return [point.lat, point.lon];								
-							}));
+							})));
 						}
 						temp.route = {
 							path: 'enc:' + path,

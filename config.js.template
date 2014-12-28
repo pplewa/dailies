@@ -1,0 +1,25 @@
+module.exports = {
+  common: {
+    evernote: {
+      key: '',
+      secret: '',
+      hostName: 'https://www.evernote.com',
+      userId: '',
+      shardId: '',
+      accessToken: '',
+      sandbox: false
+    },
+    mappiness: {
+      url: ''
+    },
+    moves: {
+      clientId: "",
+      clientSecret: "",
+      redirectUri: "",
+      accessToken: ""
+    },
+    google: {
+      key: ''
+    }
+  }
+};

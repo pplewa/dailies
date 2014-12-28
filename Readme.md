@@ -1,3 +1,3 @@
 # Dailies
 
-An automation script to scaffold daily notes in Evernote.
+Automation script to scaffold daily Evernote diary.
