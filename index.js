@@ -5,6 +5,7 @@ var Handlebars = require('handlebars');
 var moment = require('moment');
 var fs = require('fs');
 var Q = require('q');
+var html2enml = require('html2enml2').convert;
 var polyUtil = require('polyline-encoded');
 var request = require('request');
 var config = new Settings(require('./config'));
@@ -32,51 +33,37 @@ var noteStore = client.getNoteStore();
 // 
 var moves = new MovesApi(config.moves);
 
-/*
-function getToken() {
-	var client = new Evernote.Client({
-		consumerKey: config.evernote.key,
-		consumerSecret: config.evernote.secret,
-		sandbox: config.evernote.sandbox
-	});
-	client.getRequestToken('about:blank', function(error, oauthToken, oauthTokenSecret, results) {
-		// store tokens in the session
-		// and then redirect to client.getAuthorizeUrl(oauthToken)
-	});
-}
-*/
-
 function makeNote(noteTitle, noteBody, parentNotebook) {
 	var deferred = Q.defer();
-	var nBody = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-	nBody += "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">";
-	nBody += "<en-note>" + noteBody + "</en-note>";
- 
-	// Create note object
-	var date = new Date();
-	var now = moment([date.getFullYear(), date.getMonth(), date.getDate()]);
-	var ourNote = new Evernote.Note({
-		title: noteTitle,
-		content: nBody,
-		created: now.date(now.date()-1).valueOf()
-	});
- 
-	// parentNotebook is optional; if omitted, default notebook is used
-	if (parentNotebook && parentNotebook.guid) {
-		ourNote.notebookGuid = parentNotebook.guid;
-	}
- 
-	// Attempt to create note in Evernote account
-	noteStore.createNote(ourNote, function(error, note) {
-		if (error) {
-			console.log(arguments);
-			deferred.reject(new Error(error));
-			// Something was wrong with the note data
-			// See EDAMErrorCode enumeration for error code explanation
-			// http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
-		} else {
-			deferred.resolve(note);
+
+	html2enml('<body>' + noteBody + '</body>', '', function(enml, res){
+		var date = new Date();
+		var yesterday = moment([date.getFullYear(), date.getMonth(), date.getDate()]).subtract(1, 'day');
+		var ourNote = new Evernote.Note({
+			title: noteTitle,
+			tagNames: ['Journal', yesterday.format('YYYY'), yesterday.format('MMMM'), yesterday.format('dddd')],
+			content: enml,
+			created: yesterday.valueOf(),
+			resources: res
+		});
+	 
+		// parentNotebook is optional; if omitted, default notebook is used
+		if (parentNotebook && parentNotebook.guid) {
+			ourNote.notebookGuid = parentNotebook.guid;
 		}
+	 
+		// Attempt to create note in Evernote account
+		noteStore.createNote(ourNote, function(error, note) {
+			if (error) {
+				console.log(arguments);
+				deferred.reject(new Error(error));
+				// Something was wrong with the note data
+				// See EDAMErrorCode enumeration for error code explanation
+				// http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
+			} else {
+				deferred.resolve(note);
+			}
+		});
 	});
 	return deferred.promise;	
 }
@@ -84,7 +71,13 @@ function makeNote(noteTitle, noteBody, parentNotebook) {
 function getMemories() {
 	var deferred = Q.defer();
 	var filter = new Evernote.NoteFilter({
-		words: 'notebook:journal intitle:' + moment().date(moment().date()-1).format('DD/MM/'),
+		words: 'notebook:journal intitle:' + moment().subtract(1, 'day').format('DD/MM/'),
+		order: Evernote.NoteSortOrder.CREATED,
+		ascending: false
+	});
+	var foodFilter = new Evernote.NoteFilter({
+		words: 'notebook:food created:day-1',
+		// words: 'notebook:food created:day-1 -created:day',
 		order: Evernote.NoteSortOrder.CREATED,
 		ascending: false
 	});
@@ -102,7 +95,15 @@ function getMemories() {
 					title: note.title
 				});
 			});
-			deferred.resolve(memories);
+			noteStore.findNotesMetadata(foodFilter, 0, 10, noteSpec, function(error, data){
+				data.notes.forEach(function(note){
+					memories.push({
+						link: 'evernote:///view/' + config.evernote.userId + '/' + config.evernote.shardId + '/' + note.guid + '/' + note.guid + '/',
+						title: note.title
+					});
+				});
+				deferred.resolve(memories);
+			});
 		}
 	});
 	return deferred.promise;
@@ -139,9 +140,9 @@ function getMappiness() {
 				{ name: 'Happy', 'value': getVal(h) + ' ' + getFace(h) },
 				{ name: 'Relax', 'value': getVal(r) + ' ' + getFace(r) },
 				{ name: 'Awake', 'value': getVal(a) + ' ' + getFace(a) },
-				{ name: 'Productivity', 'value': '0' }
+				{ name: 'Productivity', 'value': '0 😫😟😐😌😀' }
 			]);
-  		};
+		};
 	});
 	return deferred.promise;
 }
@@ -155,8 +156,35 @@ function getStoryline() {
 		} else {
 			var storyline = {
 				summary: storylines[0].summary,
+				paths: [],
 				segments: []
 			};
+
+			var paths = [];
+			storylines[0].segments.forEach(function(seg, i){
+				paths[i] = {
+					walking: [],
+					traveling: []
+				};
+				seg.activities.forEach(function(activity){
+					if (activity.activity === 'walking') {
+						activity.trackPoints.forEach(function(point){
+							paths[i].walking.push([point.lat, point.lon]);
+						});
+					} else {
+						 activity.trackPoints.forEach(function(point){
+							paths[i].traveling.push([point.lat, point.lon]);
+						});
+					}
+				});
+			});
+			paths.forEach(function(path){
+				if (path.walking.length){
+					storyline.paths.push('path=color:0xff0000ff|enc:' + polyUtil.encode(path.walking));
+				} else if (path.traveling.length){
+					storyline.paths.push('path=color:0x666666ff|enc:' + polyUtil.encode(path.traveling));
+				}
+			});
 
 			storylines[0].segments.forEach(function(segment, i){
 				if (segment.place) {
@@ -228,12 +256,13 @@ function getStoryline() {
 }
 
 Q.all([getMemories(), getMappiness(), getStoryline()]).spread(function(memories, mappiness, storyline){
-	var noteTitle = moment().date(moment().date()-1).format('DD/MM/YYYY ddd');
+	var noteTitle = moment().subtract(1, 'day').format('DD/MM/YYYY ddd');
 	var noteBody = getTemplate({ 
 		memories: memories,
 		mappiness: mappiness,
 		storyline: storyline
 	});
+
 	makeNote(noteTitle, noteBody).then(function(note){
 		console.log('ok');
 	});

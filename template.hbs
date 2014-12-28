@@ -25,7 +25,7 @@
 			</thead>
 			<tbody>
 				<tr>
-					<td style="padding: 10px; background: #fff; border-right: 1px #3A71B0 solid;">todo</td>
+					<td style="padding: 10px; background: #fff; border-right: 1px #3A71B0 solid;"><en-todo/> Todo</td>
 					<td style="padding: 10px; background: #fff; border-left: 1px #3A71B0 solid;">
 						{{#each mappiness}}<div><strong>{{name}}</strong> {{value}}</div>{{/each}}
 					</td>
@@ -59,16 +59,16 @@
 						{{#if calories}}<div><strong>Calories:</strong> {{calories}}</div>{{/if}}
 					</td>
 					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-right: 1px #8B572A solid; border-left: 1px #8B572A solid;">
-						{{#if place.foursquareId}}<a href="https://foursquare.com/v/x/{{place.foursquareId}}">{{/if}}{{#if place.name}}{{place.name}}{{else}}&nbsp;{{/if}}{{#if place.foursquareId}}</a>{{/if}}
+						{{#if place.foursquareId}}<a href="https://foursquare.com/v/x/{{place.foursquareId}}">{{/if}}{{#if place.name}}{{place.name}}{{else}}<em>{{activity}}</em>{{/if}}{{#if place.foursquareId}}</a>{{/if}}
 					</td>
 					<td style="padding: 10px; min-width: 127px; max-width: 127px; width: 127px; border-bottom: 1px #8B572A solid; border-left: 1px #8B572A solid;">
 						{{#if place.lat}}
-							<a href="http://www.google.com/maps?q={{place.lat}},{{place.lon}}" style="width: 125px; height: 125px; border: 1px #ccc solid; float: left; background: url('http://maps.googleapis.com/maps/api/staticmap?sensor=false&amp;zoom=17&amp;size=125x125&amp;scale=1&amp;center={{place.lat}},{{place.lon}}&amp;markers={{place.lat}},{{place.lon}}&amp;key={{config "google" "key"}}') 0 0 no-repeat;">
-								<table width="125" cellpadding="0" cellspacing="0" border="0"><tr><td><br /></td></tr></table>
+							<a href="http://www.google.com/maps?q={{place.lat}},{{place.lon}}">
+								<img width="125" height="125" style="border: 1px #ccc solid; float: left;" src="http://maps.googleapis.com/maps/api/staticmap?sensor=false&amp;zoom=17&amp;size=125x125&amp;scale=1&amp;center={{place.lat}},{{place.lon}}&amp;markers={{place.lat}},{{place.lon}}&amp;key={{config "google" "key"}}" />
 							</a>
 						{{else}}
-							<a href="http://www.google.com/maps?q={{route.start.lat}},{{route.start.lon}}" style="width: 125px; height: 125px; border: 1px #ccc solid; float: left; background: url('http://maps.googleapis.com/maps/api/staticmap?size=125x125&amp;path=color:0xff0000ff|weight:3|{{route.path}}&amp;markers=label:S%7C{{route.start.lat}},{{route.start.lon}}&amp;markers=label:F%7C{{route.finish.lat}},{{route.finish.lon}}&amp;key={{config "google" "key"}}') 0 0 no-repeat;">
-								<table width="125" cellpadding="0" cellspacing="0" border="0"><tr><td><br /></td></tr></table>
+							<a href="http://www.google.com/maps?q={{route.start.lat}},{{route.start.lon}}">
+								<img width="125" height="125" style="border: 1px #ccc solid; float: left;" src="http://maps.googleapis.com/maps/api/staticmap?size=125x125&amp;path=color:0xff0000ff|weight:3|{{route.path}}&amp;markers=label:S%7C{{route.start.lat}},{{route.start.lon}}&amp;markers=label:F%7C{{route.finish.lat}},{{route.finish.lon}}&amp;key={{config "google" "key"}}" />
 							</a>
 						{{/if}}
 					</td>
@@ -96,7 +96,14 @@
 							</ul>
 						{{/each}}
 					</td>
-					<td style="padding: 10px; border-left: 1px #8B572A solid;">map</td>
+					<td style="padding: 10px; border-left: 1px #8B572A solid;">
+						Map
+						{{!--
+						<a href="#" style="width: 500px; height: 500px; border: 1px #ccc solid; float: left; background: url('http://maps.googleapis.com/maps/api/staticmap?sensor=false&amp;size=500x500&amp;scale=1{{#each storyline.paths}}&amp;{{this}}{{/each}}&amp;key={{config "google" "key"}}') 0 0 no-repeat;">
+							<table width="125" cellpadding="0" cellspacing="0" border="0"><tr><td><br /></td></tr></table>
+						</a>
+						--}}
+					</td>
 				</tr>
 			</tbody>
 		</table>
@@ -114,7 +121,7 @@
 			</thead>
 			<tbody style="background: #fff;">
 				<tr>
-					<td style="padding: 10px 10px 7px;">&nbsp;</td>
+					<td style="padding: 10px 10px 7px;"> </td>
 				</tr>
 			</tbody>
 		</table>
