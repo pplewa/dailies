@@ -30,7 +30,7 @@ var client = new Evernote.Client({
 });
 var noteStore = client.getNoteStore();
 
-// 
+//
 var moves = new MovesApi(config.moves);
 
 function makeNote(noteTitle, noteBody, parentNotebook) {
@@ -46,12 +46,12 @@ function makeNote(noteTitle, noteBody, parentNotebook) {
 			created: yesterday.valueOf(),
 			resources: res
 		});
-	 
+
 		// parentNotebook is optional; if omitted, default notebook is used
 		if (parentNotebook && parentNotebook.guid) {
 			ourNote.notebookGuid = parentNotebook.guid;
 		}
-	 
+
 		// Attempt to create note in Evernote account
 		noteStore.createNote(ourNote, function(error, note) {
 			if (error) {
@@ -65,7 +65,7 @@ function makeNote(noteTitle, noteBody, parentNotebook) {
 			}
 		});
 	});
-	return deferred.promise;	
+	return deferred.promise;
 }
 
 function getMemories() {
@@ -197,17 +197,19 @@ function getStoryline() {
 						start: moment(segment.startTime, 'YYYYMMDDTHms').format('HH:mm'),
 						end: moment(segment.endTime, 'YYYYMMDDTHms').format('HH:mm')
 					};
-					temp.activity = segment.activities[0].activity;
-					if (segment.activities.length === 1) {
-						temp.duration = segment.activities[0].duration;
-						temp.distance = segment.activities[0].distance;
-						temp.steps = segment.activities[0].steps;
-						temp.calories = segment.activities[0].calories;
-					} else if (segment.activities.length > 1) {
-						temp.duration = segment.activities.reduce(function(a, b){ return (a.duration || 0) + (b.duration || 0); });
-						temp.distance = segment.activities.reduce(function(a, b){ return (a.distance || 0) + (b.distance || 0); });
-						temp.steps = segment.activities.reduce(function(a, b){ return (a.steps || 0) + (b.steps || 0); });
-						temp.calories = segment.activities.reduce(function(a, b){ return (a.calories || 0) + (b.calories || 0); });
+					if (segment.activities) {
+						temp.activity = segment.activities[0].activity;
+						if (segment.activities.length === 1) {
+							temp.duration = segment.activities[0].duration;
+							temp.distance = segment.activities[0].distance;
+							temp.steps = segment.activities[0].steps;
+							temp.calories = segment.activities[0].calories;
+						} else if (segment.activities.length > 1) {
+							temp.duration = segment.activities.reduce(function(a, b){ return (a.duration || 0) + (b.duration || 0); });
+							temp.distance = segment.activities.reduce(function(a, b){ return (a.distance || 0) + (b.distance || 0); });
+							temp.steps = segment.activities.reduce(function(a, b){ return (a.steps || 0) + (b.steps || 0); });
+							temp.calories = segment.activities.reduce(function(a, b){ return (a.calories || 0) + (b.calories || 0); });
+						}
 					}
 					if (i === 0) temp.start = '00:00';
 					if (i === storylines[0].segments.length - 1) temp.end = '00:00';
@@ -241,7 +243,7 @@ function getStoryline() {
 								lon: activity.trackPoints[activity.trackPoints.length-1].lon
 							}
 							var path = encodeURIComponent(polyUtil.encode(activity.trackPoints.map(function(point){
-								return [point.lat, point.lon];								
+								return [point.lat, point.lon];
 							})));
 						}
 						temp.route = {
@@ -262,7 +264,7 @@ function getStoryline() {
 
 Q.all([getMemories(), getMappiness(), getStoryline()]).spread(function(memories, mappiness, storyline){
 	var noteTitle = moment().subtract(1, 'day').format('DD/MM/YYYY ddd');
-	var noteBody = getTemplate({ 
+	var noteBody = getTemplate({
 		memories: memories,
 		mappiness: mappiness,
 		storyline: storyline
@@ -272,5 +274,5 @@ Q.all([getMemories(), getMappiness(), getStoryline()]).spread(function(memories,
 		console.log('ok');
 	});
 }).fail(function(){
-	console.log(arguments);	
+	console.log(arguments);
 });
