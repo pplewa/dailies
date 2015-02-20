@@ -1,12 +1,12 @@
 <div style="display: table; width: 100%; background: #F0F0F0; font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;">
 	<div style="display: table-row;">
 	<div style="padding: 5px; display: table-cell">
-				
+
 		<table style="width: 100%; min-width: 100%; max-width: 100%; border: 2px #DB931F solid;" cellpadding="0" cellspacing="0" border="0">
 			<thead style="background: #DB931F; color: #fff;">
 				<tr><td style="padding: 5px 10px;">Diary</td></tr>
 			</thead>
-			<tbody style="background: #fff; font-family: 'Noteworthy',Times,serif;">
+			<tbody style="background: #fff; font-family: 'Noteworthy',Times,serif;font-size:18px;line-height:29px;">
 				<tr><td style="padding: 10px;">Daily notes...</td></tr>
 			</tbody>
 		</table>
@@ -50,11 +50,11 @@
 				{{#each storyline.segments}}
 				<tr>
 					<td style="padding: 10px; border-bottom: 1px #8B572A solid; border-right: 1px #8B572A solid;">
-						<div><strong>Start:</strong> {{start}}</div>
-						<div><strong>End:</strong> {{end}}</div>
-						<div><strong>Activity:</strong> {{activity}}</div>
-						<div><strong>Duration:</strong> {{mins duration}} min</div>
-						<div><strong>Distance:</strong> {{distance}} m</div>
+						{{#if start}}<div><strong>Start:</strong> {{start}}</div>{{/if}}
+						{{#if end}}<div><strong>End:</strong> {{end}}</div>{{/if}}
+						{{#if activity}}<div><strong>Activity:</strong> {{activity}}</div>{{/if}}
+						{{#if duration}}<div><strong>Duration:</strong> {{mins duration}} min</div>{{/if}}
+						{{#if distance}}<div><strong>Distance:</strong> {{distance}} m</div>{{/if}}
 						{{#if steps}}<div><strong>Steps:</strong> {{steps}}</div>{{/if}}
 						{{#if calories}}<div><strong>Calories:</strong> {{calories}}</div>{{/if}}
 					</td>
@@ -87,14 +87,21 @@
 				<tr>
 					<td style="padding: 10px; border-right: 1px #8B572A solid;">
 						{{#each storyline.summary}}
-							<div><strong>{{activity}}</strong></div>
+							<div><strong>{{upperCase activity}}</strong></div>
 							<ul>
-								<li><strong>Distance:</strong> {{distance}} m</li>
-								<li><strong>Duration:</strong> {{mins duration}} min</li>
+								{{#if distance}}<li><strong>Distance:</strong> {{distance}} m</li>{{/if}}
+								{{#if duration}}<li><strong>Duration:</strong> {{mins duration}} min</li>{{/if}}
 								{{#if steps}}<li><strong>Steps:</strong> {{steps}}</li>{{/if}}
 								{{#if calories}}<li><strong>Calories:</strong> {{calories}}</li>{{/if}}
 							</ul>
 						{{/each}}
+						<div><strong>Fitbit</strong></div>
+						<ul>
+							<li><strong>Sleep:</strong>  {{fitbit.sleep}}</li>
+							<li><strong>Weight:</strong>  {{fitbit.weight}}</li>
+							<li><strong>Steps:</strong>  {{fitbit.sleep}}</li>
+						</ul>
+						<div><strong>Farts:</strong> 15</div>
 					</td>
 					<td style="padding: 10px; border-left: 1px #8B572A solid;">
 						{{#if storyline.mapPath}}

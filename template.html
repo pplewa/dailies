@@ -19,6 +19,12 @@
 		return Math.round(value/60);
 	});
 
+	Handlebars.registerHelper("upperCase", function(value) {
+		return value.toLowerCase().replace(/\b[a-z]/g, function(letter) {
+			return letter.toUpperCase();
+		}).replace('_', ' ');
+	});
+
 	$.ajax({
 		url: 'template.hbs',
 		cache: true,
@@ -79,8 +85,7 @@
 					}, {
 						distance: 13086,
 						duration: 2189,
-						group: "transport",
-						activity: "boat"
+						activity: "gym_training"
 					}]
 				}
 			}));

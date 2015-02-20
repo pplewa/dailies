@@ -19,6 +19,12 @@ Handlebars.registerHelper("config", function(val1, val2) {
 	return config[val1][val2];
 });
 
+Handlebars.registerHelper("upperCase", function(value) {
+	return value.toLowerCase().replace(/\b[a-z]/g, function(letter) {
+		return letter.toUpperCase();
+	}).replace('_', ' ');
+});
+
 //
 var template = fs.readFileSync('template.hbs', { encoding: 'utf-8' });
 var getTemplate = Handlebars.compile(template);
@@ -262,12 +268,23 @@ function getStoryline() {
 	return deferred.promise;
 }
 
-Q.all([getMemories(), getMappiness(), getStoryline()]).spread(function(memories, mappiness, storyline){
+function getFitbit() {
+	var deferred = Q.defer();
+	deferred.resolve({
+		sleep: '0:00 hrs',
+		weight: '0.0 kg 0.0% fat',
+		steps: '0'
+	});
+	return deferred.promise;
+}
+
+Q.all([getMemories(), getMappiness(), getStoryline(), getFitbit()]).spread(function(memories, mappiness, storyline, fitbit){
 	var noteTitle = moment().subtract(1, 'day').format('DD/MM/YYYY ddd');
 	var noteBody = getTemplate({
 		memories: memories,
 		mappiness: mappiness,
-		storyline: storyline
+		storyline: storyline,
+		fitbit: fitbit
 	});
 
 	makeNote(noteTitle, noteBody).then(function(note){
