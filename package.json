@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "evernote": "^1.25.3",
+    "fitbit-node": "^0.1.0",
     "handlebars": "^2.0.0",
     "html2enml2": "^0.2.0",
     "moment": "^2.8.4",

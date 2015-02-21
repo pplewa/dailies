@@ -1,5 +1,6 @@
 var Evernote = require('evernote').Evernote;
 var MovesApi = require('moves-api').MovesApi;
+var Fitbit = require('fitbit-node');
 var Settings = require('settings');
 var Handlebars = require('handlebars');
 var moment = require('moment');
@@ -38,6 +39,9 @@ var noteStore = client.getNoteStore();
 
 //
 var moves = new MovesApi(config.moves);
+
+//
+var fitbit = new Fitbit(config.fitbit.key, config.fitbit.secret);
 
 function makeNote(noteTitle, noteBody, parentNotebook) {
 	var deferred = Q.defer();
@@ -268,13 +272,32 @@ function getStoryline() {
 	return deferred.promise;
 }
 
+function getFitbitData(url) {
+	return fitbit.requestResource(url, 'GET', config.fitbit.accessToken, config.fitbit.accessTokenSecret);
+}
+
 function getFitbit() {
 	var deferred = Q.defer();
-	deferred.resolve({
-		sleep: '0:00 hrs',
-		weight: '0.0 kg 0.0% fat',
-		steps: '0'
-	});
+	var yesterday = moment().subtract(1, 'day').format('YYYY-MM-DD');
+	var weight = '/body/log/weight/date/' + yesterday + '.json';
+	var fat = '/body/log/fat/date/' + yesterday + '.json';
+	var sleep = '/sleep/date/' + yesterday + '.json';
+	var activities = '/activities/date/' + yesterday + '.json';
+
+	Q.all([getFitbitData(weight), getFitbitData(fat), getFitbitData(sleep), getFitbitData(activities)]).spread(function(weight, fat, sleep, activities){
+		var weightData = JSON.parse(weight[0]).weight[0];
+		var fatData = JSON.parse(fat[0]).fat[0];
+		var sleepData = JSON.parse(sleep[0]).summary;
+		var activitiesData = JSON.parse(activities[0]).summary;
+
+		deferred.resolve({
+			weight: weightData.weight,
+			fat: fatData.fat,
+			sleep: moment.utc(sleepData.totalMinutesAsleep * 60 * 1000).format("H:mm"),
+			steps: activitiesData.steps
+		});
+	}).fail(deferred.reject);
+
 	return deferred.promise;
 }
 
