@@ -11,6 +11,8 @@ var polyUtil = require('polyline-encoded');
 var request = require('request');
 var config = new Settings(require('./config'));
 
+var DAYS_AGO = 1;
+
 // Handlebards helpers
 Handlebars.registerHelper("mins", function(value) {
 	return Math.round(value/60);
@@ -48,7 +50,7 @@ function makeNote(noteTitle, noteBody, parentNotebook) {
 
 	html2enml('<body>' + noteBody + '</body>', '', function(enml, res){
 		var date = new Date();
-		var yesterday = moment([date.getFullYear(), date.getMonth(), date.getDate()]).subtract(1, 'day');
+		var yesterday = moment([date.getFullYear(), date.getMonth(), date.getDate()]).subtract(DAYS_AGO, 'day');
 		var ourNote = new Evernote.Note({
 			title: noteTitle,
 			tagNames: ['Journal', yesterday.format('YYYY'), yesterday.format('MMMM'), yesterday.format('dddd')],
@@ -81,7 +83,7 @@ function makeNote(noteTitle, noteBody, parentNotebook) {
 function getMemories() {
 	var deferred = Q.defer();
 	var filter = new Evernote.NoteFilter({
-		words: 'notebook:journal intitle:' + moment().subtract(1, 'day').format('DD/MM/'),
+		words: 'notebook:journal intitle:' + moment().subtract(DAYS_AGO, 'day').format('DD/MM/'),
 		order: Evernote.NoteSortOrder.CREATED,
 		ascending: false
 	});
@@ -130,7 +132,7 @@ function getMappiness() {
 			for (var i = 0; i < 10; i++) {
 				var logDate = new Date(data[i].start_time_epoch*1000);
 				var diff = now.diff(moment([logDate.getFullYear(), logDate.getMonth(), logDate.getDate()]), 'days');
-				if (diff === 1) {
+				if (diff === DAYS_AGO) {
 					logs++;
 					a += data[i].awake;
 					h += data[i].happy;
@@ -160,7 +162,7 @@ function getMappiness() {
 
 function getStoryline() {
 	var deferred = Q.defer();
-	moves.getStoryline({ trackPoints: true, date: moment().subtract(1, 'day') }, function(error, storylines) {
+	moves.getStoryline({ trackPoints: true, date: moment().subtract(DAYS_AGO, 'day') }, function(error, storylines) {
 		if (error) {
 			deferred.reject(new Error(error));
 		} else {
@@ -261,6 +263,7 @@ function getStoryline() {
 							start: start,
 							finish: finish
 						};
+						// if (i >= 10)
 						storyline.segments.push(temp);
 					});
 				}
@@ -278,7 +281,7 @@ function getFitbitData(url) {
 
 function getFitbit() {
 	var deferred = Q.defer();
-	var yesterday = moment().subtract(1, 'day').format('YYYY-MM-DD');
+	var yesterday = moment().subtract(DAYS_AGO, 'day').format('YYYY-MM-DD');
 	var weight = '/body/log/weight/date/' + yesterday + '.json';
 	var fat = '/body/log/fat/date/' + yesterday + '.json';
 	var sleep = '/sleep/date/' + yesterday + '.json';
@@ -302,7 +305,7 @@ function getFitbit() {
 }
 
 Q.all([getMemories(), getMappiness(), getStoryline(), getFitbit()]).spread(function(memories, mappiness, storyline, fitbit){
-	var noteTitle = moment().subtract(1, 'day').format('DD/MM/YYYY ddd');
+	var noteTitle = moment().subtract(DAYS_AGO, 'day').format('DD/MM/YYYY ddd');
 	var noteBody = getTemplate({
 		memories: memories,
 		mappiness: mappiness,
